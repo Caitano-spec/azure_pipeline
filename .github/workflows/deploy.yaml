@@ -20,12 +20,6 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      # Step 3: Set AZURE_CREDENTIALS using secrets
-      - name: Debug AZURE_CREDENTIALS
-        run: |
-          echo "AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}"
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq .
-
       # Step 4: Login to Azure using service principal
       - name: Azure login
         run: |
