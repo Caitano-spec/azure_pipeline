@@ -39,7 +39,7 @@ jobs:
           az storage blob upload-batch \
             -d '$web' \
             --account-name perkupstorage \
-            --source ./static_website \
+            --source ./home.html \
             --overwrite true
 
       - name: Deployment Successful
