@@ -34,10 +34,11 @@ jobs:
 
       - name: Upload to Azure Blob Storage
         run: |
-          az storage blob upload-batch \
+          az storage blob upload \
             --container-name '$web' \
             --account-name perkupstorage \
-            --source . \
+            --name home.html \
+            --file ./home.html \
             --overwrite
 
       - name: Deployment Successful
