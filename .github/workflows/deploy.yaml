@@ -20,18 +20,23 @@ jobs:
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      # Step 4: Login to Azure using service principal
+      # Step 3: Azure login using service principal credentials stored in GitHub Secrets
       - name: Azure login
         run: |
+          # Fetch the secrets as a JSON object and use jq to extract each value
           AZURE_CREDENTIALS="${{ secrets.AZURE_CREDENTIALS }}"
           CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.clientId')
           CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r '.clientSecret')
           TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.tenantId')
           SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r '.subscriptionId')
+
+          # Log in using the extracted credentials
           az login --service-principal --username $CLIENT_ID --password $CLIENT_SECRET --tenant $TENANT_ID
+
+          # Set the subscription
           az account set --subscription $SUBSCRIPTION_ID
 
-      # Step 5: Upload content to Azure Blob Storage using Azure CLI
+      # Step 4: Upload content to Azure Blob Storage using Azure CLI
       - name: Upload to Azure Blob Storage
         run: |
           az storage blob upload-batch \
@@ -40,6 +45,6 @@ jobs:
             --source ./static_website \
             --overwrite true  # Overwrite existing files in Azure if they are updated
 
-      # Step 6: Notify success
+      # Step 5: Notify success
       - name: Deployment Successful
         run: echo "Deployment to Azure Storage Account completed successfully!"
