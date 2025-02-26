@@ -19,8 +19,11 @@ jobs:
 
       - name: Login to Azure
         run: |
-          echo "${{ secrets.AZURE_CREDENTIALS }}" > azure_credentials.json
-          az login --service-principal --username ${{ secrets.CLIENT_ID }} --password ${{ secrets.CLIENT_SECRET }} --tenant ${{ secrets.TENANT_ID }}
+          AZURE_CREDENTIALS=$(echo "${{ secrets.AZURE_CREDENTIALS }}" | jq '.')
+          CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.clientId')
+          CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r '.clientSecret')
+          TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.tenantId')
+          az login --service-principal --username $CLIENT_ID --password $CLIENT_SECRET --tenant $TENANT_ID
 
       - name: Upload to Azure Storage
         run: |
