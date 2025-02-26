@@ -17,8 +17,8 @@ jobs:
 
       - name: Debug AZURE_CREDENTIALS
         run: |
-          echo "AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}"
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | jq .
+          echo "AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}" | jq .
+          echo '{ "clientId": "your-client-id", "clientSecret": "your-client-secret" }' | jq .
 
       - name: Login to Azure
         run: |
