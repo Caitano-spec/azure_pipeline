@@ -1,6 +1,5 @@
 name: Azure Web Deploy
 
-# Trigger this workflow whenever code is pushed to the 'main' branch
 on:
   push:
     branches:
@@ -23,7 +22,7 @@ jobs:
       # Step 3: Azure login using service principal credentials stored in GitHub Secrets
       - name: Azure login
         run: |
-          # Fetch the secrets as a JSON object and use jq to extract each value
+          # Fetch the secrets from GitHub Secrets and parse with jq
           AZURE_CREDENTIALS="${{ secrets.AZURE_CREDENTIALS }}"
           CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.clientId')
           CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r '.clientSecret')
