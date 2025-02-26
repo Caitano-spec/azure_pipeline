@@ -7,50 +7,40 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Use Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Install Azure CLI
       - name: Install Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      # Step 3: Azure login using service principal credentials stored in GitHub Secrets
       - name: Azure login
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          # Fetch the secrets from GitHub Secrets (JSON string)
-          AZURE_CREDENTIALS="${{ secrets.AZURE_CREDENTIALS }}"
+          echo $AZURE_CREDENTIALS | jq
+          CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.clientId')
+          CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r '.clientSecret')
+          TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.tenantId')
+          SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r '.subscriptionId')
 
-          # Extract clientId, clientSecret, tenantId, and subscriptionId from AZURE_CREDENTIALS
-          CLIENT_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"clientId": "\(.*\)",.*/\1/p')
-          CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"clientSecret": "\(.*\)",.*/\1/p')
-          TENANT_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"tenantId": "\(.*\)",.*/\1/p')
-          SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"subscriptionId": "\(.*\)".*/\1/p')
-
-          # Debugging: Print the extracted values
           echo "Client ID: $CLIENT_ID"
           echo "Tenant ID: $TENANT_ID"
           echo "Subscription ID: $SUBSCRIPTION_ID"
 
-          # Log in using the extracted credentials
-          az login --service-principal --username "$CLIENT_ID" --password "$CLIENT_SECRET" --tenant "$TENANT_ID"
+          az login --service-principal --username $CLIENT_ID --password $CLIENT_SECRET --tenant $TENANT_ID
+          az account set --subscription $SUBSCRIPTION_ID
 
-          # Set the subscription
-          az account set --subscription "$SUBSCRIPTION_ID"
-
-      # Step 4: Upload content to Azure Blob Storage using Azure CLI
       - name: Upload to Azure Blob Storage
         run: |
           az storage blob upload-batch \
             -d '$web' \
             --account-name perkupstorage \
             --source ./static_website \
-            --overwrite true  # Overwrite existing files in Azure if they are updated
+            --overwrite true
 
-      # Step 5: Notify success
       - name: Deployment Successful
         run: echo "Deployment to Azure Storage Account completed successfully!"
