@@ -1,9 +1,5 @@
-name: Deploy to Azure Storage
-
-on:
-  push:
-    branches:
-      - main
+env:
+  STORAGE_ACCOUNT_NAME: "perkupstorage"
 
 jobs:
   deploy:
@@ -27,4 +23,4 @@ jobs:
 
       - name: Upload to Azure Storage
         run: |
-          az storage blob upload-batch -d \$web -s . --account-name perkupstorage
+          az storage blob upload-batch --destination \$web --source . --account-name $STORAGE_ACCOUNT_NAME
