@@ -22,12 +22,14 @@ jobs:
       # Step 3: Azure login using service principal credentials stored in GitHub Secrets
       - name: Azure login
         run: |
-          # Fetch the secrets from GitHub Secrets and parse with jq
+          # Fetch the secrets from GitHub Secrets (JSON string)
           AZURE_CREDENTIALS="${{ secrets.AZURE_CREDENTIALS }}"
-          CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.clientId')
-          CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r '.clientSecret')
-          TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r '.tenantId')
-          SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r '.subscriptionId')
+
+          # Extract clientId, clientSecret, tenantId, and subscriptionId from AZURE_CREDENTIALS
+          CLIENT_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"clientId": "\(.*\)",.*/\1/p')
+          CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"clientSecret": "\(.*\)",.*/\1/p')
+          TENANT_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"tenantId": "\(.*\)",.*/\1/p')
+          SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | sed -n 's/.*"subscriptionId": "\(.*\)".*/\1/p')
 
           # Log in using the extracted credentials
           az login --service-principal --username $CLIENT_ID --password $CLIENT_SECRET --tenant $TENANT_ID
